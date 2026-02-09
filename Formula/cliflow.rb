@@ -11,7 +11,7 @@ class Cliflow < Formula
   desc "IDE-style terminal autocompletion for 800+ CLI tools - offline, privacy-first"
   homepage "https://github.com/adnankoroth/cliflow"
   url "https://github.com/adnankoroth/cliflow/archive/refs/tags/v1.0.0.tar.gz"
-  sha256 "abf065ce207bf31c445fbd7fa7508dbcec4305680179af9c0e228ccd021bd9cb"
+  sha256 "1b1d2a56c26858ba24a41e109aa6dd95d0c586f27ffd8fa138f6cfe8f10ed5b6"
   license "MIT"
   head "https://github.com/adnankoroth/cliflow.git", branch: "main"
 
