@@ -15,7 +15,7 @@ class Cliflow < Formula
   license "MIT"
   head "https://github.com/adnankoroth/cliflow.git", branch: "main"
 
-  depends_on "node@20"
+  depends_on "node@22"
 
   def install
     # Install npm dependencies
@@ -35,14 +35,14 @@ class Cliflow < Formula
     (bin/"cliflow").write <<~EOS
       #!/bin/bash
       export CLIFLOW_HOME="${CLIFLOW_HOME:-$HOME/.cliflow}"
-      exec "#{Formula["node@20"].opt_bin}/node" "#{libexec}/build/bin/cliflow.js" "$@"
+      exec "#{Formula["node@22"].opt_bin}/node" "#{libexec}/build/bin/cliflow.js" "$@"
     EOS
 
     # Create daemon wrapper
     (bin/"cliflow-daemon").write <<~EOS
       #!/bin/bash
       export CLIFLOW_HOME="${CLIFLOW_HOME:-$HOME/.cliflow}"
-      exec "#{Formula["node@20"].opt_bin}/node" "#{libexec}/build/daemon/server.js" "$@"
+      exec "#{Formula["node@22"].opt_bin}/node" "#{libexec}/build/daemon/server.js" "$@"
     EOS
 
     # Install zsh completions
