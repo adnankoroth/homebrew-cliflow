@@ -28,7 +28,7 @@ class Cliflow < Formula
     libexec.install "build"
     libexec.install "package.json"
 
-    # Install shell integration files to share (must happen before zsh/bash completion installs)
+    # Install shell integration files to share
     (share/"cliflow").install "shell-integration"
 
     # Create main CLI wrapper
@@ -45,11 +45,9 @@ class Cliflow < Formula
       exec "#{Formula["node@22"].opt_bin}/node" "#{libexec}/build/daemon/server.js" "$@"
     EOS
 
-    # Install zsh completions
-    zsh_completion.install share/"cliflow/shell-integration/cliflow.zsh" => "_cliflow"
-
-    # Install bash completions
-    bash_completion.install share/"cliflow/shell-integration/cliflow.bash" => "cliflow"
+    # Install zsh/bash completions by copying from share (not moving)
+    zsh_completion.install_symlink share/"cliflow/shell-integration/cliflow.zsh" => "_cliflow"
+    bash_completion.install_symlink share/"cliflow/shell-integration/cliflow.bash" => "cliflow"
   end
 
   def post_install
