@@ -10,12 +10,12 @@
 class Cliflow < Formula
   desc "IDE-style terminal autocompletion for 800+ CLI tools - offline, privacy-first"
   homepage "https://github.com/adnankoroth/cliflow"
-  url "https://github.com/adnankoroth/cliflow/archive/refs/tags/v1.0.0.tar.gz"
-  sha256 "41c2ecfe2762fd542535c2e2bdd1488556a0d182955586d4e6af2eb03d68ee1b"
+  url "https://github.com/adnankoroth/cliflow/archive/refs/tags/v1.0.1.tar.gz"
+  sha256 "3e84fa1473fd291cde0bd2f2b09302e45fb62d5e9b07baaf792e07ae4466d78b"
   license "MIT"
   head "https://github.com/adnankoroth/cliflow.git", branch: "main"
 
-  depends_on "node"
+  depends_on "node@20"
 
   def install
     # Install npm dependencies
@@ -26,38 +26,43 @@ class Cliflow < Formula
     
     # Install to libexec (keeps node_modules isolated)
     libexec.install "build"
+    libexec.install "shell-integration"
     libexec.install "package.json"
-    
-    # Install shell integration files using system cp
-    shell_dir = share/"cliflow/shell-integration"
-    shell_dir.mkpath
-    cp "shell-integration/cliflow.zsh", shell_dir
-    cp "shell-integration/cliflow.bash", shell_dir
-    cp "shell-integration/cliflow.fish", shell_dir
-    cp "shell-integration/client.mjs", shell_dir
     
     # Create main CLI wrapper
     (bin/"cliflow").write <<~EOS
       #!/bin/bash
       export CLIFLOW_HOME="${CLIFLOW_HOME:-$HOME/.cliflow}"
-      exec "#{Formula["node"].opt_bin}/node" "#{libexec}/build/bin/cliflow.js" "$@"
+      exec "#{Formula["node@20"].opt_bin}/node" "#{libexec}/build/bin/cliflow.js" "$@"
     EOS
 
     # Create daemon wrapper
     (bin/"cliflow-daemon").write <<~EOS
       #!/bin/bash
       export CLIFLOW_HOME="${CLIFLOW_HOME:-$HOME/.cliflow}"
-      exec "#{Formula["node"].opt_bin}/node" "#{libexec}/build/daemon/server.js" "$@"
+      exec "#{Formula["node@20"].opt_bin}/node" "#{libexec}/build/daemon/server.js" "$@"
     EOS
 
-    # Install completions (copy from source, not shell_dir, since install moves files)
+    # Install shell integration files to share
+    (share/"cliflow").install "shell-integration"
+    
+    # Install zsh completions
     zsh_completion.install "shell-integration/cliflow.zsh" => "_cliflow"
+    
+    # Install bash completions  
     bash_completion.install "shell-integration/cliflow.bash" => "cliflow"
   end
 
   def post_install
-    # Note: ~/.cliflow is created automatically by shell integration on first load
+    # Create CLIFLOW_HOME directory
     (var/"cliflow").mkpath
+    
+    # Create symlink for shell integration
+    cliflow_home = Pathname.new(ENV["HOME"])/".cliflow"
+    unless cliflow_home.exist?
+      cliflow_home.mkpath
+      (cliflow_home/"shell-integration").make_symlink(share/"cliflow/shell-integration")
+    end
   end
 
   def caveats
