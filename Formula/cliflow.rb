@@ -11,7 +11,7 @@ class Cliflow < Formula
   desc "IDE-style terminal autocompletion for 800+ CLI tools - offline, privacy-first"
   homepage "https://github.com/adnankoroth/cliflow"
   url "https://github.com/adnankoroth/cliflow/archive/refs/tags/v1.0.1.tar.gz"
-  sha256 "3e84fa1473fd291cde0bd2f2b09302e45fb62d5e9b07baaf792e07ae4466d78b"
+  sha256 "f7c6267e18d62c560557495da28ffb21ac260f450bb0c429143f9613cca8361e"
   license "MIT"
   head "https://github.com/adnankoroth/cliflow.git", branch: "main"
 
@@ -20,15 +20,17 @@ class Cliflow < Formula
   def install
     # Install npm dependencies
     system "npm", "ci", "--ignore-scripts"
-    
+
     # Build the project
     system "npm", "run", "build"
-    
+
     # Install to libexec (keeps node_modules isolated)
     libexec.install "build"
-    libexec.install "shell-integration"
     libexec.install "package.json"
-    
+
+    # Install shell integration files to share (must happen before zsh/bash completion installs)
+    (share/"cliflow").install "shell-integration"
+
     # Create main CLI wrapper
     (bin/"cliflow").write <<~EOS
       #!/bin/bash
@@ -43,14 +45,11 @@ class Cliflow < Formula
       exec "#{Formula["node@20"].opt_bin}/node" "#{libexec}/build/daemon/server.js" "$@"
     EOS
 
-    # Install shell integration files to share
-    (share/"cliflow").install "shell-integration"
-    
     # Install zsh completions
-    zsh_completion.install "shell-integration/cliflow.zsh" => "_cliflow"
-    
-    # Install bash completions  
-    bash_completion.install "shell-integration/cliflow.bash" => "cliflow"
+    zsh_completion.install share/"cliflow/shell-integration/cliflow.zsh" => "_cliflow"
+
+    # Install bash completions
+    bash_completion.install share/"cliflow/shell-integration/cliflow.bash" => "cliflow"
   end
 
   def post_install
